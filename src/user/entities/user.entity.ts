@@ -6,12 +6,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { ROUNDS_OF_HASHING } from '@src/constants/constants';
+import { Session } from '@src/session/entities/session.entity';
 
 @Entity()
 @Unique('UQ_USERNAME', ['username'])
@@ -36,6 +38,9 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @OneToMany(() => Session, (session) => session.user)
+  sessions!: Session[];
 
   @BeforeInsert()
   public async hashPassword(): Promise<void> {

@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import {
   ApiBody,
   ApiOkResponse,
@@ -6,6 +6,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Request as req } from 'express';
+import * as UAParser from 'ua-parser-js';
 
 import { AccessUserDto } from '@src/user/dto/access-user.dto';
 import { CreateUserDto } from '@src/user/dto/create-user.dto';

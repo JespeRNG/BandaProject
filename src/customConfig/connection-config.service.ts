@@ -8,6 +8,7 @@ import {
   POSTGRES_PORT,
   POSTGRES_USERNAME,
 } from '@src/constants/constants';
+import { Session } from '@src/session/entities/session.entity';
 import { User } from '@src/user/entities/user.entity';
 import { CustomConfigService } from './custom-config.service';
 
@@ -27,7 +28,7 @@ export class ConnectionConfigService {
 
       synchronize: true,
 
-      entities: [User],
+      entities: [User, Session],
     };
   }
 }

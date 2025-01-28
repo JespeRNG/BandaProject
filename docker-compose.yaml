@@ -1,0 +1,35 @@
+version: '3.8'
+
+volumes:
+  pgdata:
+
+services:
+  postgres:
+    container_name: bandaproj-postgres
+    image: postgres:17
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+    environment:
+      PG_DATA: /var/lib/postgresql/data
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    container_name: bandaproj-app
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: './Dockerfile'
+    env_file:
+      - .env
+    volumes:
+      - /base/node_modules/
+      - ./:/base
+    ports:
+      - '${APP_PORT}:${APP_PORT}'
+    depends_on:
+      - postgres
+

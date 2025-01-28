@@ -5,6 +5,12 @@ export const JWT_REFRESH_SECRET =
   '2bffbe2da786478ccf2633aa7c73aa042cbc4449f186b208cb072142c60e5bbc';
 
 export const ROUNDS_OF_HASHING = 10;
+
+export const ACCESS_EXPIRESIN = 300; //5 minutes in seconds
+
+export const REFRESH_EXPIRESIN = '7d';
+
+export const IS_SKIP_AUTH_KEY = 'skip-auth';
 //#endregion
 
 //#region .env keys

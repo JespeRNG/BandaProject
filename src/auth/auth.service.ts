@@ -24,7 +24,6 @@ export class AuthService {
     const isUserExist = await this.userService.isUserExist(
       createUserDto.username
     );
-    console.log(`User exists: ${isUserExist}`);
     if (isUserExist) {
       throw new ConflictException(
         `Username ${createUserDto.username} is already taken.`

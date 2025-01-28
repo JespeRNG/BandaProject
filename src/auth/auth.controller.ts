@@ -7,18 +7,25 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { AccessUserDto } from '@src/user/dto/access-user.dto';
 import { CreateUserDto } from '@src/user/dto/create-user.dto';
 import { User } from '@src/user/entities/user.entity';
+import { UserService } from '@src/user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { TokensDto } from './dto/tokens.dto';
+import { SkipAuth } from './guards/skip-auth.guard';
 import { AuthService } from './auth.service';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService
+  ) {}
 
   @Post('signup')
+  @SkipAuth()
   @ApiOperation({ summary: 'Create user' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({
@@ -37,6 +44,7 @@ export class AuthController {
   }
 
   @Post('signin')
+  @SkipAuth()
   @ApiOperation({
     summary: 'Signs in, returns tokens and adds them to cookies',
   })
@@ -46,7 +54,15 @@ export class AuthController {
     description: 'No user found for username: ${username}',
   })
   @ApiResponse({ status: 401, description: 'Invalid password' })
-  public async signIn(loginDto: LoginDto): Promise<TokensDto> {
-    return await this.authService.signIn(loginDto);
+  public async signIn(@Body() loginDto: LoginDto): Promise<{
+    tokens: TokensDto;
+    userMetaData: AccessUserDto;
+  }> {
+    const tokensDto = await this.authService.signIn(loginDto);
+    const userMetaData = await this.userService.getUserMetadata(
+      loginDto.username
+    );
+
+    return { tokens: tokensDto, userMetaData: userMetaData };
   }
 }

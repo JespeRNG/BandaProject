@@ -1,20 +1,21 @@
-/* import {
-  BadRequestException,
-  Body,
-  Controller,
-  Post,
-} from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
-import { CreateUserDto } from './dto/create-user.dto';
 //import { UserService } from './user.service';
 
+@ApiTags('auth')
+@ApiBearerAuth()
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(/* private readonly userService: UserService */) {}
 
-  @Post()
-  public postUser(@Body() createUserDto: CreateUserDto) {
-    if (createUserDto === null) throw new BadRequestException(`{}`);
+  @Get()
+  @ApiOperation({ summary: 'Guarded?' })
+  public async someGuardedEndpoint(): Promise<{ message: string }> {
+    return { message: 'someMessage' };
   }
 }
- */

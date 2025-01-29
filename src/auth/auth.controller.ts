@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import {
   ApiBody,
   ApiOkResponse,
@@ -6,15 +6,14 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Request as req } from 'express';
-import * as UAParser from 'ua-parser-js';
 
+import { SessionService } from '@src/session/session.service';
 import { AccessUserDto } from '@src/user/dto/access-user.dto';
 import { CreateUserDto } from '@src/user/dto/create-user.dto';
 import { User } from '@src/user/entities/user.entity';
 import { UserService } from '@src/user/user.service';
 import { LoginDto } from './dto/login.dto';
-import { TokensDto } from './dto/tokens.dto';
+import { TokensDto } from '../token/dto/tokens.dto';
 import { SkipAuth } from './guards/skip-auth.guard';
 import { AuthService } from './auth.service';
 
@@ -23,7 +22,8 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly sessionService: SessionService
   ) {}
 
   @Post('signup')
@@ -64,6 +64,11 @@ export class AuthController {
     const userMetaData = await this.userService.getUserMetadata(
       loginDto.username
     );
+
+    await this.sessionService.createSession({
+      userId: userMetaData.id,
+      refreshToken: tokensDto.refreshToken,
+    });
 
     return { tokens: tokensDto, userMetaData: userMetaData };
   }

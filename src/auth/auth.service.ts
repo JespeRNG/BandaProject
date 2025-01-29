@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
+import { TokenService } from '@src/token/token.service';
 import { CreateUserDto } from '@src/user/dto/create-user.dto';
 import { User } from '@src/user/entities/user.entity';
 import { UserService } from '@src/user/user.service';
+import { TokensDto } from '../token/dto/tokens.dto';
 import { LoginDto } from './dto/login.dto';
-import { TokensDto } from './dto/tokens.dto';
-import { TokenService } from './token.service';
 
 @Injectable()
 export class AuthService {

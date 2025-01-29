@@ -1,11 +1,13 @@
 import {
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
+import { SessionService } from '@src/session/session.service';
 import { TokenService } from '@src/token/token.service';
 import { CreateUserDto } from '@src/user/dto/create-user.dto';
 import { User } from '@src/user/entities/user.entity';
@@ -17,7 +19,8 @@ import { LoginDto } from './dto/login.dto';
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly sessionService: SessionService
   ) {}
 
   public async signUp(createUserDto: CreateUserDto): Promise<User> {
@@ -53,11 +56,27 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Wrong password');
     }
-
-    const tokensDto = await this.tokenService.createTokens(
+    const refreshToken = await this.tokenService.signRefreshToken(
       user.id,
       user.username
     );
-    return tokensDto;
+
+    const session = await this.sessionService.createSession({
+      userId: user.id,
+      refreshToken,
+    });
+
+    if (!session)
+      throw new InternalServerErrorException(
+        `Session creation failed.`
+      );
+
+    const accessToken = await this.tokenService.signAccessToken(
+      user.id,
+      user.username,
+      session.id
+    );
+
+    return { accessToken, refreshToken };
   }
 }

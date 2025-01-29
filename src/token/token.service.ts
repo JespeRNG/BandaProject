@@ -7,27 +7,34 @@ import {
   JWT_REFRESH_SECRET,
   REFRESH_EXPIRESIN,
 } from '@src/constants/constants';
-import { TokensDto } from './dto/tokens.dto';
 
 @Injectable()
 export class TokenService {
   constructor(private readonly jwtService: JwtService) {}
 
-  public async createTokens(
+  public async signAccessToken(
     id: string,
-    username: string
-  ): Promise<TokensDto> {
+    username: string,
+    sessionId: string
+  ): Promise<string> {
     const accessToken = await this.jwtService.signAsync(
       {
         sub: id,
         username,
+        sessionId,
       },
       {
         secret: JWT_ACCESS_SECRET,
         expiresIn: ACCESS_EXPIRESIN, // 5 minutes in secods
       }
     );
+    return accessToken;
+  }
 
+  public async signRefreshToken(
+    id: string,
+    username: string
+  ): Promise<string> {
     const refreshToken = await this.jwtService.signAsync(
       {
         sub: id,
@@ -38,7 +45,6 @@ export class TokenService {
         expiresIn: REFRESH_EXPIRESIN, //7 days
       }
     );
-
-    return { accessToken, refreshToken };
+    return refreshToken;
   }
 }

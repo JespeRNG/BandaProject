@@ -7,13 +7,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-import { SessionService } from '@src/session/session.service';
 import { AccessUserDto } from '@src/user/dto/access-user.dto';
 import { CreateUserDto } from '@src/user/dto/create-user.dto';
 import { User } from '@src/user/entities/user.entity';
 import { UserService } from '@src/user/user.service';
-import { LoginDto } from './dto/login.dto';
 import { TokensDto } from '../token/dto/tokens.dto';
+import { LoginDto } from './dto/login.dto';
 import { SkipAuth } from './guards/skip-auth.guard';
 import { AuthService } from './auth.service';
 
@@ -22,8 +21,7 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly userService: UserService,
-    private readonly sessionService: SessionService
+    private readonly userService: UserService
   ) {}
 
   @Post('signup')
@@ -65,11 +63,6 @@ export class AuthController {
       loginDto.username
     );
 
-    await this.sessionService.createSession({
-      userId: userMetaData.id,
-      refreshToken: tokensDto.refreshToken,
-    });
-
-    return { tokens: tokensDto, userMetaData: userMetaData };
+    return { tokens: tokensDto, userMetaData };
   }
 }

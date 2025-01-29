@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { CreateSessionDto } from './dto/create-session.dto';
@@ -24,8 +28,26 @@ export class SessionService {
     return session;
   }
 
+  public async findByRefreshToken(
+    refreshToken: string
+  ): Promise<Session> {
+    const session =
+      await this.sessionRepository.findByRefreshToken(refreshToken);
+
+    if (!session)
+      throw new NotFoundException(
+        `No session found for refreshToken: ${refreshToken}`
+      );
+
+    return session;
+  }
+
+  public async deleteSession(sessionId: string): Promise<void> {
+    this.sessionRepository.delete(sessionId);
+  }
+
   @Cron(CronExpression.EVERY_HOUR)
-  public clearExpiredSessions(): void {
+  protected clearExpiredSessions(): void {
     this.sessionRepository.clearExpiredSessions();
   }
 }

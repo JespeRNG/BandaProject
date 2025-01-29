@@ -8,8 +8,14 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 @Module({
-  imports: [UserModule, SessionModule, TokenModule],
-  providers: [AccessTokenStrategy, AuthService, AccessTokenStrategy],
+  imports: [
+    UserModule,
+    SessionModule,
+    TokenModule,
+    SessionModule,
+    TokenModule,
+  ],
+  providers: [AccessTokenStrategy, AuthService],
   controllers: [AuthController],
 })
 export class AuthModule {}

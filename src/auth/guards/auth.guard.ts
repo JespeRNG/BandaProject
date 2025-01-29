@@ -11,8 +11,11 @@ import { Request } from 'express';
 import {
   IS_SKIP_AUTH_KEY,
   JWT_ACCESS_SECRET,
+  JWT_REFRESH_SECRET,
 } from '@src/constants/constants';
 import { UserService } from '@src/user/user.service';
+import { TOKEN_TYPE_KEY } from '../decorators/token-type.decorator';
+import { TokenType } from '../enums/token-type.enum';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -34,16 +37,36 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const accessToken = this.extractTokenFromHeader(request);
+    const requiredTokenType =
+      this.reflector.getAllAndOverride<TokenType>(TOKEN_TYPE_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) || TokenType.ACCESS;
 
-    if (!accessToken) {
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
+
+    if (!token) {
       throw new UnauthorizedException('No tokens provided.');
     }
 
-    const decodedToken = this.jwtService.verify(accessToken, {
-      secret: JWT_ACCESS_SECRET,
-    });
+    let decodedToken;
+    try {
+      decodedToken = this.jwtService.verify(token, {
+        secret:
+          requiredTokenType === TokenType.ACCESS
+            ? JWT_ACCESS_SECRET
+            : JWT_REFRESH_SECRET,
+      });
+    } catch (e) {
+      throw new UnauthorizedException(e, 'Invalid token.');
+    }
+
+    if (decodedToken.type !== requiredTokenType) {
+      throw new UnauthorizedException(
+        `Expected ${requiredTokenType} token.`
+      );
+    }
 
     const user = await this.userService.findById(decodedToken['sub']);
     if (!user) {

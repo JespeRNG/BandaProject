@@ -25,11 +25,25 @@ export class SessionRepository {
     return sessions;
   }
 
+  public findByRefreshToken(
+    refreshToken: string
+  ): Promise<Session | null> {
+    const session = this.repository.findOne({
+      where: { refreshToken },
+    });
+
+    return session;
+  }
+
   public clearExpiredSessions(): void {
     const currentDate = new Date();
 
     this.repository.delete({
       expiresAt: LessThan(currentDate),
     });
+  }
+
+  public async delete(sessionId: string): Promise<void> {
+    this.repository.delete({ id: sessionId });
   }
 }
